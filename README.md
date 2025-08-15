@@ -13,6 +13,23 @@ It serves as a practical exploration into the **core concepts behind world model
 ## 🧠 Model Architecture
 The model is composed of several key modules that work in concert to predict the next frame.
 
+
+```mermaid
+graph TD
+    A[Input Image (Galaxy)] --> B[Image Encoder (CNN)]
+    A2[Photometric Features] --> C[Feature Processor (Dense Layers)]
+    
+    B --> D[Feature Fusion Layer]
+    C --> D
+    
+    D --> E[Dense Layer(s)]
+    E --> F[Output: Predicted Redshift]
+    
+    style A fill:#f9f,stroke:#333,stroke-width:1px
+    style A2 fill:#bbf,stroke:#333,stroke-width:1px
+    style F fill:#bfb,stroke:#333,stroke-width:1px
+```
+
 ### 1. **ImageEncoder**
 A **Convolutional Neural Network (CNN)** that processes the input image frame `(64x64x3)`.  
 It downsamples the image through a series of convolutional layers to extract a **high-level feature representation**, which is then **flattened into a sequence of spatial tokens** for the Transformer.
