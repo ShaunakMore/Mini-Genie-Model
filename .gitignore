@@ -1,0 +1,61 @@
+# --- Python cache & build files ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.so
+*.egg
+*.egg-info/
+build/
+dist/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+*.env
+*.venv
+
+# --- Jupyter Notebook checkpoints ---
+.ipynb_checkpoints/
+
+# --- Ignore all .npy files in data folder except data.ipynb ---
+data/*.npy
+!data/data.ipynb
+
+# --- Data files (general, outside /data folder) ---
+*.npz
+*.csv
+*.tsv
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+
+# --- Model weights & logs ---
+*.pth
+*.pt
+*.ckpt
+logs/
+wandb/
+mlruns/
+
+# --- Images / Plots generated during runs ---
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.svg
+
+# --- OS-specific ---
+.DS_Store
+Thumbs.db
+
+# --- IDE / Editor settings ---
+.vscode/
+.idea/
+*.swp
+*.swo
