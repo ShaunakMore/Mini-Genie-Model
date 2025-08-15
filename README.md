@@ -1,77 +1,81 @@
-
 # Mini-Genie: An Action-Conditioned World Model
 
 ## 📌 Overview
 **Mini-Genie** is a deep learning project inspired by Google DeepMind's groundbreaking work on generative interactive environments.  
-This project implements a **foundational world model** that learns the dynamics of an environment to **predict future frames** based on the current state and a given action.
+It implements a **foundational world model** that learns the dynamics of an environment to **predict future frames** based on the current state and a given action.
 
 Built with **PyTorch**, Mini-Genie uses a **CNN-Transformer architecture** to process visual information and model temporal relationships.  
-It serves as a practical exploration into the **core concepts behind world models** and **action-conditioned video prediction**.
+This project serves as a hands-on exploration into **world models** and **action-conditioned video prediction**.
 
 ---
 
 ## 🧠 Model Architecture
-The model is composed of several key modules that work in concert to predict the next frame.
-
+The model is composed of several key modules that work together to predict the next frame.
 
 ```mermaid
-graph TD
-    A[Input Image (Galaxy)] --> B[Image Encoder (CNN)]
-    A2[Photometric Features] --> C[Feature Processor (Dense Layers)]
-    
-    B --> D[Feature Fusion Layer]
+flowchart TD
+    A["Input Frame (64x64x3)"] --> B["Image Encoder (CNN)"]
+    B --> D["Latent State Representation"]
+
+    X["Action (Discrete)"] --> C["Action Embedding"]
     C --> D
-    
-    D --> E[Dense Layer(s)]
-    E --> F[Output: Predicted Redshift]
-    
-    style A fill:#f9f,stroke:#333,stroke-width:1px
-    style A2 fill:#bbf,stroke:#333,stroke-width:1px
-    style F fill:#bfb,stroke:#333,stroke-width:1px
+
+    D --> E["Transformer (Temporal Dynamics)"]
+    E --> F["Frame Decoder (Transposed CNN)"]
+    F --> G["Predicted Next Frame"]
 ```
 
 ### 1. **ImageEncoder**
-A **Convolutional Neural Network (CNN)** that processes the input image frame `(64x64x3)`.  
-It downsamples the image through a series of convolutional layers to extract a **high-level feature representation**, which is then **flattened into a sequence of spatial tokens** for the Transformer.
+
+A **Convolutional Neural Network (CNN)** that processes the input frame `(64x64x3)`.
+It downsamples through a series of convolutional layers to extract a **high-level latent representation** of the state, which is then converted into a sequence of tokens for the Transformer.
 
 ### 2. **ActionEmbedding**
-Converts discrete, categorical actions (e.g., `Turn Left`, `Move Forward`) into **dense vector embeddings**.  
-This numerical representation of the action is concatenated with the image tokens for Transformer processing.
+
+Converts discrete actions (e.g., `turn_left`, `move_forward`) into **dense vector embeddings**.
+The action vector is concatenated with the image tokens before being passed to the Transformer.
 
 ### 3. **Transformer**
-The **core of the model's temporal reasoning**.  
-It takes the sequence of image and action tokens, adds **positional embeddings**, and uses **self-attention mechanisms** to model how the action will influence the visual features of the environment.
+
+The **core temporal reasoning module**.
+It models how the given action transforms the current state into the next state using **self-attention** and **positional embeddings**.
 
 ### 4. **FrameDecoder**
-A **transposed convolutional network (deconvolutional network)** that reconstructs the predicted next frame.  
-It reshapes the processed tokens from the Transformer into a spatial format and upsamples them to generate the final output image.
+
+A **transposed convolutional network** that reconstructs the predicted next frame from the transformed latent representation.
 
 ### 5. **MiniGenie**
-The main class that orchestrates:
-1. Passing the initial frame & action to the encoder and action embedding.
-2. Processing with the Transformer.
-3. Decoding the predicted frame with the FrameDecoder.
+
+The main class that:
+
+1. Passes the initial frame & action to the encoder and action embedding.
+2. Processes the combined tokens with the Transformer.
+3. Decodes the predicted frame with the FrameDecoder.
 
 ---
 
 ## 📊 Results & Evaluation
-The model was trained on `(initial_frame, action, next_frame)` tuples and evaluated on a held-out test set.  
+
+The model was trained on `(initial_frame, action, next_frame)` tuples and evaluated on a held-out test set.
 
 **Performance Metrics:**
-- **Mean Squared Error (MSE):** `0.000447`
-- **Mean Absolute Error (MAE):** `0.001996`
-- **Peak Signal-to-Noise Ratio (PSNR):** `33.50 dB`
 
-The image at the top of this README shows a **side-by-side comparison** of the model's predictions against the actual next frames.
+* **Mean Squared Error (MSE):** `0.000447`
+* **Mean Absolute Error (MAE):** `0.001996`
+* **Peak Signal-to-Noise Ratio (PSNR):** `33.50 dB`
+
+Below is a side-by-side comparison between **actual** and **predicted** frames (64×64 resolution — hence a bit pixelated 😅):
 
 ---
 
 ## ⚙️ Setup and Usage
 
 ### 1. **Prerequisites**
-Ensure you have **Python 3** installed.  
-Install the dependencies:
-```
+
+Ensure you have **Python 3** installed.
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
@@ -93,24 +97,24 @@ Pillow
 
 ### 2. **Dataset**
 
-The model expects a dataset split into three `.npy` files:
+The model expects:
 
 * `images.npy` — Initial frames
-* `actions.npy` — Corresponding actions
-* `next_frames.npy` — Resulting next frames
+* `actions.npy` — Actions taken
+* `next_frames.npy` — Ground-truth next frames
 
-Place these files in the **root directory** of the project.
+Place these in the `data/` folder.
 
 ---
 
 ### 3. **Training**
 
-To train from scratch, run the training cells in **`mini-genie.ipynb`**:
+Run `mini-genie.ipynb` and:
 
-* Load and split the dataset.
-* Initialize **MiniGenie**, loss function, and optimizer.
-* Run the training loop for the chosen number of epochs.
-* Save the best model weights to `mini-genie.pth`.
+1. Load and split the dataset.
+2. Initialize **MiniGenie**, loss function, and optimizer.
+3. Train for chosen epochs.
+4. Save best weights to `mini-genie.pth`.
 
 ---
 
@@ -118,21 +122,23 @@ To train from scratch, run the training cells in **`mini-genie.ipynb`**:
 
 To evaluate:
 
-* Load the saved weights from `mini-genie.pth`.
-* Calculate MSE, MAE, and PSNR on the test set.
-* Generate `model_evaluation_grid.png` to visualize predictions.
+1. Load `mini-genie.pth`.
+2. Compute **MSE**, **MAE**, and **PSNR** on test set.
+3. Generate visualizations (`model_evaluation_grid.png`).
 
 ---
 
 ## 🚀 Future Work
 
-* **Larger Dataset:** Improve generalization by training on more diverse data.
-* **Higher Resolution:** Extend architecture to handle higher-resolution images.
-* **Interactive Environment:** Create a playable loop where the model's output feeds back as input.
+* **Bigger datasets** for better generalization.
+* **Higher resolution** predictions.
+* **Interactive simulation** where the model’s outputs feed back into itself.
 
 ---
 
 ## 📜 License
 
-This project is licensed under the **MIT License**.
-See the [LICENSE](LICENSE) file for details.
+Licensed under the **MIT License**.
+See [LICENSE](LICENSE) for details.
+
+
